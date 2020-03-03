@@ -1,0 +1,9 @@
+[
+  {
+    "artifact": "frcCpp (in project imu_more_like_emu)",
+    "target": "roborio",
+    "component": "frcUserProgram",
+    "debugfile": "frcCpp_roborio.debugconfig",
+    "language": "cpp"
+  }
+]

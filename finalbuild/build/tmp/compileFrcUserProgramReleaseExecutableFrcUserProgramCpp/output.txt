@@ -1,0 +1,4 @@
+See file:///C:/Users/erinw/Desktop/2020%20CODE%20YAY%20WORKING/finalbuild/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramReleaseExecutableFrcUserProgramCpp.
+compiling DriveTrain.cpp successful.
+
+Finished compileFrcUserProgramReleaseExecutableFrcUserProgramCpp, see full log file:///C:/Users/erinw/Desktop/2020%20CODE%20YAY%20WORKING/finalbuild/build/tmp/compileFrcUserProgramReleaseExecutableFrcUserProgramCpp/output.txt.
