@@ -46,38 +46,77 @@ void Robot::TeleopPeriodic()
   m_StartButton = m_stick.GetRawButton(kJoystickButtonStart);
   m_LStickButton = m_stick.GetRawButton(kJoystickButtonLStick);
   m_RStickButton = m_stick.GetRawButton(kJoystickButtonRStick);
+  m_altEnableA = m_alt.GetRawButton(kAltJoystickEnableA);
+  m_altEnableB = m_alt.GetRawButton(kAltJoystickEnableB);
 
+  //Set a flag for whether the Y Axis is used for operating the piston arms or the winch
+  enableState = 0;
+  if(m_altEnableB == false && m_altEnableA == false){enableState = 0;}
+  if(m_altEnableA == true && m_altEnableB == false){enableState = 1;}
+  if(m_altEnableB == true && m_altEnableA == false){enableState = -1;}
+  if(m_altEnableB == true && m_altEnableA == true){enableState = 0;}
+ 
   //Solenoid Control
-  int armState = 0;
-  if(m_alt.GetY() > 0.5){armState = -1;}
-  if(m_alt.GetY() < -0.5){armState = 1;}
-  if(armState == 1){m_solenoidArmsUp.Set(1);}
-  if(armState == -1){m_solenoidArmsDown.Set(1);}
+  armState = 0;  
+  if(m_alt.GetY() > 0.75 && enableState == 1)
+  {
+    armState = 1;
+    m_solenoidArmsDown.Set(1);
+  }
+  if(m_alt.GetY() < -0.75 && enableState == 1)
+  {
+    armState = 1;
+    m_solenoidArmsUp.Set(1);
+  }
   if(armState == 0)
   {
     m_solenoidArmsUp.Set(0);
     m_solenoidArmsDown.Set(0);
   }
+  
+  //Winch Control
+  winchState = 0;
+  if(m_alt.GetY() > 0 && enableState == -1)
+  {
+    winchState = 1;
+    m_winch.Set(m_alt.GetY());
+  }
+  if(m_alt.GetY() < 0 && enableState == -1)
+  {
+    winchState = 1;
+    m_winch.Set(m_alt.GetY());
+  }
+  if(winchState == 0)
+  {
+    m_winch.Set(0);
+  }
 
   //Back Door Control
-  int backState = 0;
-  if(m_AButton == true && m_BButton == false){backState = 1;}
-  if(m_BButton == true && m_AButton == false){backState = -1;}
+  backState = 0;
+  if(m_AButton == true && m_BButton == false)
+  {
+    backState = 1;
+    m_backDoorDown.Set(1);
+  }
+  if(m_BButton == true && m_AButton == false)
+  {
+    backState = 1;
+    m_backDoorUp.Set(1);
+  }
   if(backState == 0)
   {
     m_backDoorDown.Set(0);
     m_backDoorUp.Set(0);
   }
-  if(backState == 1){m_backDoorDown.Set(1);}
-  if(backState == -1){m_backDoorUp.Set(1);}
-  
-  //Belt Control Code
+
+
+  //Belt Control Code (on main controller)
   //button state more like button florida xd
   int florida = 0;
   if(m_LTButton == true){florida = 1;}
   if(m_RTButton == true){florida = -1;}
   m_belt.Set(belt_speed * florida);
-
+  
   // Output the position of one iteration of the first
   // signature to the driver station
   if (timed == 10)

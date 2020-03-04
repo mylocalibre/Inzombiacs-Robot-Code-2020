@@ -1,4 +1,4 @@
-(This is a legit read me file according to Alex Dorsey :thonk:)
+(This is a legit read me file according to Alex Dorsey.)
 
 This repository was written in C++ for the official FRC 2020, by team 4064, the Inzombiacs.
 Found in the src\main\cpp folder, there are two main cpp files, one running the main drive train loop,

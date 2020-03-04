@@ -78,28 +78,30 @@ private:
     int m_BackButton_old = 0;
     int m_StartButton_old = 0;
 
-    /*
     //Alternate Stick Buttons
-    static constexpr int kRightSolenoidButton1 = 1;
-    static constexpr int kLeftSolenoidButton2 = 2;
-    static constexpr int kRightSolenoidButton1 = 1;
-    static constexpr int kLeftSolenoidButton2 = 2;
-    */
+    static constexpr int kAltJoystickEnableA = 1;
+    static constexpr int kAltJoystickEnableB = 2;
+    int m_altEnableA = 0;
+    int m_altEnableB = 0;
+
     // Drive Motors
     static constexpr int kFrontLeftChannel = 0;
     static constexpr int kRearLeftChannel = 1;
     static constexpr int kFrontRightChannel = 2;
     static constexpr int kRearRightChannel = 3;
     
-    //i see both sides like the belt
+    //Aux Motors
     static constexpr int kBeltChanel = 4;
+     //i see both sides of the belt
+    static constexpr int kWinchChannel = 5;
 
-    //Motors
+    //Motor Declarations
     frc::PWMVictorSPX m_frontLeft{kFrontLeftChannel};
     frc::PWMVictorSPX m_rearLeft{kRearLeftChannel};
     frc::PWMVictorSPX m_frontRight{kFrontRightChannel};
     frc::PWMVictorSPX m_rearRight{kRearRightChannel};
     frc::PWMVictorSPX m_belt{kBeltChanel};
+    frc::PWMVictorSPX m_winch{kWinchChannel};
 
     //Solenoids
     frc::Solenoid m_solenoidArmsUp{1};
@@ -107,8 +109,15 @@ private:
     frc::Solenoid m_backDoorDown{0};
     frc::Solenoid m_backDoorUp{7};   
 
+    //Inital States
     // driveState = False for no robot-oriented (default)
     // driveState = True for no field-oriented
+    bool backState = 0;
+    bool armState = 0;
+    bool winchState = 0;
+    int enableState = 0;
+
+
     bool driveState = false;
     frc::MecanumDrive m_robotDrive{m_frontLeft, m_rearLeft, m_frontRight, m_rearRight};
     
