@@ -13,7 +13,9 @@ int timed = 0;
 
 // This is called whenever the robot turns on
 void Robot::RobotInit() 
-{
+{ 
+  m_compressor.Start();
+  m_compressor.SetClosedLoopControl(false);
   pixy2.init();
   pixy2.setLamp(0,0);
   pixy2.setLED(0,0,0);
@@ -46,37 +48,160 @@ void Robot::TeleopPeriodic()
   m_StartButton = m_stick.GetRawButton(kJoystickButtonStart);
   m_LStickButton = m_stick.GetRawButton(kJoystickButtonLStick);
   m_RStickButton = m_stick.GetRawButton(kJoystickButtonRStick);
+  m_altEnableA = m_alt.GetRawButton(kAltJoystickEnableA);
+  m_altEnableB = m_alt.GetRawButton(kAltJoystickEnableB);
 
-  //Solenoid Control
-  int armState = 0;
-  if(m_alt.GetY() > 0.5){armState = -1;}
-  if(m_alt.GetY() < -0.5){armState = 1;}
-  if(armState == 1){m_solenoidArmsUp.Set(1);}
-  if(armState == -1){m_solenoidArmsDown.Set(1);}
-  if(armState == 0)
-  {
-    m_solenoidArmsUp.Set(0);
-    m_solenoidArmsDown.Set(0);
-  }
-
+  /*
+    --------------------------
+    MAIN CONTROllER SUBSYSTEMS
+    --------------------------
+    BACK DOOR SOLENOIDS, BELT MOTOR, AND COMPRESSOR
+ */
   //Back Door Control
-  int backState = 0;
-  if(m_AButton == true && m_BButton == false){backState = 1;}
-  if(m_BButton == true && m_AButton == false){backState = -1;}
+  backState = 0;
+  if(m_AButton == true && m_BButton == false)
+  {
+    backState = 1;
+    m_backDoorDown.Set(1);
+  }
+  if(m_BButton == true && m_AButton == false)
+  {
+    backState = 1;
+    m_backDoorUp.Set(1);
+  }
   if(backState == 0)
   {
     m_backDoorDown.Set(0);
     m_backDoorUp.Set(0);
   }
-  if(backState == 1){m_backDoorDown.Set(1);}
-  if(backState == -1){m_backDoorUp.Set(1);}
-  
-  //Belt Control Code
+  //Belt Control Code (on main controller) 
   //button state more like button florida xd
   int florida = 0;
   if(m_LTButton == true){florida = 1;}
   if(m_RTButton == true){florida = -1;}
+  //belt speed is a constant set in the DriveTrain.h file
   m_belt.Set(belt_speed * florida);
+
+  //Compressor Control 
+  cReading = m_XButton;
+  if(cReading == true && cPrevious == false)
+   {
+    if(cState == true)
+    {
+      m_compressor.Stop();
+      cState = false;
+    }
+    else
+    {
+      m_compressor.Start();
+      cState = true;
+    }
+  }
+  cPrevious = cReading;
+ 
+
+
+
+
+  /* 
+    ------------------
+    ALT STICK CONTROLS
+    ------------------
+  */
+  //Sets mode of operation on the alternate stick
+  //(Two control planes)
+  enableState = 0; 
+  if(m_altEnableB == false && m_altEnableA == false){enableState = 0;}
+  if(m_altEnableA == true && m_altEnableB == false){enableState = 1;}
+  if(m_altEnableB == true && m_altEnableA == false){enableState = -1;}
+  if(m_altEnableB == true && m_altEnableA == true){enableState = 0;}
+ 
+ /*
+    ENABLE STATE = 1
+    PISTON SOLENOIDS AND WINCH MOTOR
+ */
+  //Solenoid Control
+  armState = 0;  
+  if(m_alt.GetY() > 0.75 && enableState == 1)
+  {
+    armState = 1;
+    m_mainArmsDown.Set(1);
+  }
+  if(m_alt.GetY() < -0.75 && enableState == 1)
+  {
+    armState = 1;
+    m_mainArmsUp.Set(1);
+  }
+  if(armState == 0)
+  {
+    m_mainArmsUp.Set(0);
+    m_mainArmsDown.Set(0);
+  }
+  
+  //Winch Control
+  winchState = 0;
+  if(m_alt.GetX() > 0.25 && enableState == 1)
+  {
+    winchState = 1;
+    m_winch.Set(1.33*(m_alt.GetX() - 0.25));
+  }
+  if(m_alt.GetX() < -0.25 && enableState == 1)
+  {
+    winchState = 1;
+    m_winch.Set(1.33*(m_alt.GetX() + 0.25));
+  }
+  if(winchState == 0)
+  {
+    m_winch.Set(0);
+  }
+
+
+
+ /*
+    ENABLE STATE = -1
+    CONTROL ARM PISTON SOLENOIDS AND SPINNER MOTOR
+ */
+  //Control Arm Solenoid
+  controlState = 0;  
+  if(m_alt.GetY() > 0.75 && enableState == -1)
+  {
+    controlState = 1;
+    m_controlArmDown.Set(1);
+  }
+  if(m_alt.GetY() < -0.75 && enableState == -1)
+  {
+    controlState = 1;
+    m_controlArmUp.Set(1);
+  }
+  if(controlState == 0)
+  {
+    m_controlArmUp.Set(0);
+    m_controlArmDown.Set(0);
+  }
+
+  //Control Arm Spinner
+  spinnerState = 0;
+  if(m_alt.GetX() > 0.25 && enableState == -1)
+  {
+    spinnerState = 1;
+    m_controlArmSpinner.Set(1.33*(m_alt.GetX() - 0.25));
+  }
+  if(m_alt.GetX() < -0.25 && enableState == -1)
+  {
+    spinnerState = 1;
+    m_controlArmSpinner.Set(1.33*(m_alt.GetX() + 0.25));
+  }
+  if(spinnerState == 0)
+  {
+    m_controlArmSpinner.Set(0);
+  }
+
+
+  
+  /*
+    DRIVING
+    PIXY CAM PROCESSING, IMU PROCESSING, AND DRIVE TRAIN MOVEMENT
+  */
 
   // Output the position of one iteration of the first
   // signature to the driver station

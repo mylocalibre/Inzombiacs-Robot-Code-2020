@@ -1,5 +1,5 @@
 // Header for the main robot file
-
+#include <frc/Compressor.h>
 #include <frc/I2C.h>
 #include <frc/Timer.h>
 #include <iostream>
@@ -78,37 +78,64 @@ private:
     int m_BackButton_old = 0;
     int m_StartButton_old = 0;
 
-    /*
     //Alternate Stick Buttons
-    static constexpr int kRightSolenoidButton1 = 1;
-    static constexpr int kLeftSolenoidButton2 = 2;
-    static constexpr int kRightSolenoidButton1 = 1;
-    static constexpr int kLeftSolenoidButton2 = 2;
-    */
+    static constexpr int kAltJoystickEnableA = 1;
+    static constexpr int kAltJoystickEnableB = 2;
+    int m_altEnableA = 1;
+    int m_altEnableB = 2;
+
+/*
+------------------------
+    PWM DECLARATIONS
+------------------------
+*/
     // Drive Motors
     static constexpr int kFrontLeftChannel = 0;
     static constexpr int kRearLeftChannel = 1;
     static constexpr int kFrontRightChannel = 2;
     static constexpr int kRearRightChannel = 3;
     
-    //i see both sides like the belt
+    //Aux Motors
     static constexpr int kBeltChanel = 4;
+     //i see both sides of the belt
+    static constexpr int kWinchChannel = 5;
+    static constexpr int kControlArmChannel = 6;
 
-    //Motors
+    //Motor Declarations
     frc::PWMVictorSPX m_frontLeft{kFrontLeftChannel};
     frc::PWMVictorSPX m_rearLeft{kRearLeftChannel};
     frc::PWMVictorSPX m_frontRight{kFrontRightChannel};
     frc::PWMVictorSPX m_rearRight{kRearRightChannel};
     frc::PWMVictorSPX m_belt{kBeltChanel};
+    frc::PWMVictorSPX m_winch{kWinchChannel};
+    frc::PWMVictorSPX m_controlArmSpinner{kControlArmChannel};
 
     //Solenoids
-    frc::Solenoid m_solenoidArmsUp{1};
-    frc::Solenoid m_solenoidArmsDown{6};
+    frc::Solenoid m_mainArmsUp{1};
+    frc::Solenoid m_mainArmsDown{6};
     frc::Solenoid m_backDoorDown{0};
     frc::Solenoid m_backDoorUp{7};   
+    frc::Solenoid m_controlArmUp{2};
+    frc::Solenoid m_controlArmDown{5};
 
+
+    //Compressor
+    frc::Compressor m_compressor{0};
+
+
+    //13 colonies (the initial states of each subsystem being used)
     // driveState = False for no robot-oriented (default)
     // driveState = True for no field-oriented
+    bool backState = 0;
+    bool armState = 0;
+    bool winchState = 0;
+    bool controlState = 0;
+    bool spinnerState = 0;
+    int enableState = 0;
+
+    bool cReading = 0;
+    bool cState = 0;
+    bool cPrevious = 0;
     bool driveState = false;
     frc::MecanumDrive m_robotDrive{m_frontLeft, m_rearLeft, m_frontRight, m_rearRight};
     
